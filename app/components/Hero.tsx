@@ -1,8 +1,10 @@
+'use client'
 import HeroVideoDialog from '@/components/magicui/hero-video-dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Globe2, Send } from 'lucide-react'
-import { title } from 'process'
+import { useUser } from '@clerk/nextjs'
+import { ArrowDown, Globe2, Send } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 
 const suggestions = [
@@ -25,10 +27,21 @@ const suggestions = [
 ]
 
 function Hero () {
+
+    const {user} = useUser();
+    const router = useRouter()
+    const onSend = () => {
+        if(!user){
+            router.push('/sign-in')
+            return ;
+        }
+        // navigate to 
+        
+    }
 return(
     <div className='mt-24 w-full flex justify-center'>
          {/* content */}
-        <div className='max-w-3xl w-full text-center space-y-6'>
+        <div className='max-w-3xl w-full text-center space-y-6 '>
            <h1 className='text-xl md:text-5xl font-bold'>Hey, I'm your personal <span className='text-primary'>Trip Planner</span></h1> 
            <p className='text-lg'>Tell me what you want, and I'll handle the rest: Flights, Hotels, trip Planner -- ll in seconds</p>
         
@@ -39,8 +52,8 @@ return(
                       className='w-full h-28 bg-transparent border-2 focus-visible:ring-0 shadow-none '
                      /> 
 
-                     <Button size={'icon'} className='absolute  bottom-6 right-6'>
-                       <Send  className='h-4 w-4'/>
+                     <Button size={'icon'} className='absolute  bottom-6 right-6' onClick={()=> onSend()}>
+                       <Send className='h-4 w-4'/>
                     </Button> 
                 </div>
             </div>
@@ -55,15 +68,18 @@ return(
                 </div>
             ))}
         </div>
-
-        {/* Video section */}
-        <HeroVideoDialog
-           className="hidden dark:block"
-           animationStyle="from-center"
-           videoSrc="https://videos.pexels.com/video-files/5495218/5495218-hd_1280_720_25fps.mp4"
-           thumbnailSrc="https://images.pexels.com/photos/5495218/pexels-photo-5495218.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
-           thumbnailAlt="Dummy Video Thumbnail"
-        />
+        
+        <div className='flex items-center justify-center flex-col'>
+            <h2 className='my-7 mt-14 flex gap-2 text-center'>Not Sure where to start? <strong>See hoe it works</strong> <ArrowDown/> </h2>
+            {/* Video section */}
+            <HeroVideoDialog
+               className="block dark:hidden"
+               animationStyle="from-left"
+               videoSrc="https://www.youtube.com/embed/0NMIZ-PTt8k"
+               thumbnailSrc="https://img.youtube.com/vi/0NMIZ-PTt8k/maxresdefault.jpg"
+               thumbnailAlt="Trip Planner Demo Video"
+            />
+        </div>
 
         </div>
     </div>
