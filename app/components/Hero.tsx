@@ -35,7 +35,8 @@ function Hero () {
             router.push('/sign-in')
             return ;
         }
-        // navigate to 
+        // navigate to Create trip Planner web page
+        router.push('/create-new-trip')
         
     }
 return(
