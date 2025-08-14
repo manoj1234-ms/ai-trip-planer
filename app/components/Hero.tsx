@@ -77,7 +77,9 @@ return(
                className="block dark:hidden"
                animationStyle="from-left"
                videoSrc="https://www.youtube.com/embed/0NMIZ-PTt8k"
-               thumbnailSrc="https://img.youtube.com/vi/0NMIZ-PTt8k/maxresdefault.jpg"
+            //    thumbnailSrc="https://img.youtube.com/vi/0NMIZ-PTt8k/maxresdefault.jpg"
+               thumbnailSrc = "https://mma.prnewswire.com/media/2401528/1_MindtripProduct.jpg?p=facebook"
+           
                thumbnailAlt="Trip Planner Demo Video"
             />
         </div>

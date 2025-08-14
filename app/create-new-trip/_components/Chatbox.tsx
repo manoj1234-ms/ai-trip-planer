@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import axios, { Axios } from 'axios'
 import { Loader, Send } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import EmptyBoxState from './EmptyBoxState'
 import GroupSizeUi from './GroupSizeUi'
 import BudgetUi from './BudgetUi'
@@ -16,11 +16,26 @@ type Message = {
   ui?: string 
 }
 
+export type TripInfo ={
+  origin: string,
+  destination: string,
+  duration: string,
+  budget: string,
+  group_size: string,
+  hotels: any,
+  itinerary: any
+
+
+}
+
+
 function ChatBox () {
    
     const [messages, setMessages] = useState<Message[]>([]);
     const [userInput, setUserInput] = useState<string>();
     const [loading, setLoading] = useState(false);
+    const [isFinal, setIsFinal] = useState(false);
+    const [tripDetail, setTripDetail] = useState<TripInfo>();
 
     const onSend = async() => {
       if(!userInput?.trim()) 
@@ -31,21 +46,28 @@ function ChatBox () {
       setUserInput('');
       const newMsg:Message= {
         role: 'user',
-        content: userInput,
+        content: userInput ?? '',
       }
 
       setMessages((prev:Message[]) => [...prev, newMsg]);
 
-        const result = await axios.post('/api/aimodel',{
-          messages:[...messages,newMsg]
+        const result = await axios.post('/api/aimodel', {
+          messages:[...messages,newMsg],
+          isFinal:isFinal
         }
         );
 
-        setMessages((prev:Message[]) => [...prev, {
+        console.log("TRIP",result.data);
+
+        !isFinal &&setMessages((prev: Message[]) => [...prev, {
           role: 'assistant',
           content: result?.data?.resp,
           ui: result?.data?.ui
         }]);
+
+        if(isFinal){
+          setTripDetail(result?.data?.trip_plan)
+        }
    
       // console.log(result.data);
       setLoading(false);
@@ -67,10 +89,27 @@ function ChatBox () {
       }
       else if(ui == 'final'){
         // final Ui components
-        return <FinalUi viewTrip ={() => console.log()} />
+        return <FinalUi viewTrip ={() => console.log()}
+        disable = {!tripDetail}
+         />
       }
       return null;
     }
+
+  useEffect(() => {
+          const lastMsg = messages[messages.length - 1]
+          if(lastMsg?.ui == 'final'){
+            setIsFinal(true);
+            setUserInput('ok, Great!')
+            // onSend();
+          }
+    },[messages])
+
+    useEffect(() => {
+      if (isFinal && userInput) {
+        onSend();
+      }
+      }, [isFinal]);
 
   return (
     <div className='h-[83vh] flex flex-col'>
