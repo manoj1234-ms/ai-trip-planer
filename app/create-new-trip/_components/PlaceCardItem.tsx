@@ -20,7 +20,7 @@ function PlaceCardItem({ activity }: Props) {
     const result = await axios.post("/api/google-place-detail", {
       placeName: activity?.place_name + ":" + activity?.place_address,
     });
-    if (result?.data?.console.e) {
+    if (result?.data?.e) {
       return;
     }
     setPhotoUrl(result?.data);
