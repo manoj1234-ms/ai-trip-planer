@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { aj } from "../arcjet/route";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { console } from "inspector";
 
 export const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -24,9 +27,9 @@ Once all required information is collected, generate and return a strict JSON re
 resp: 'Text Resp',
 ui: 'budget/GroupSize/tripDuration/final)'
 }   
- `
+ `;
 
- const FINAL_PROMPT = `Generate Travel Plan with give details, give me Hotels options list with HotelName, 
+const FINAL_PROMPT = `Generate Travel Plan with give details, give me Hotels options list with HotelName, 
 Hotel address, Price, hotel image url, geo coordinates, rating, descriptions and  suggest itinerary with placeName, Place Details, Place Image Url,
  Geo Coordinates,Place address, ticket Pricing, Time travel each of the location , with each day plan with best time to visit in JSON format.
  Output Schema:
@@ -76,12 +79,27 @@ Hotel address, Price, hotel image url, geo coordinates, rating, descriptions and
     ]
   }
 }
-`
-
+`;
 
 export async function POST(req: NextRequest) {
   const { messages, isFinal } = await req.json();
+  const user = await currentUser();
+  const { has } = await auth();
+  const hasPremiumAccess = has({ plan: "monthly" });
+  console.log("hasPremiumAccess", hasPremiumAccess);
+  const decision = await aj.protect(req, {
+    userId: user?.primaryEmailAddress?.emailAddress ?? "",
+    requested: isFinal ? 5 : 0,
+  });
 
+  console.log("Arcjet decision", decision);
+  //@ts-ignore
+  if (decision?.reason?.remaining == 0 && !hasPremiumAccess) {
+    return NextResponse.json({
+      resp: "No Free Credit Remaining",
+      ui: "limit",
+    });
+  }
   try {
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-oss-20b:free",
@@ -89,13 +107,13 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: "system",
-          content: isFinal? FINAL_PROMPT : PROMPT,
+          content: isFinal ? FINAL_PROMPT : PROMPT,
         },
         ...messages,
       ],
     });
     console.log(completion.choices[0].message);
-    const { message }= completion.choices[0];
+    const { message } = completion.choices[0];
     return NextResponse.json(JSON.parse(message.content ?? ""));
   } catch (e) {
     return NextResponse.json(e);
