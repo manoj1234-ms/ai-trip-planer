@@ -1,4 +1,5 @@
 'use client'
+import GlobalMap from "@/app/create-new-trip/_components/GlobalMap";
 import Itinerary from "@/app/create-new-trip/_components/itinerary";
 import { Trip } from "@/app/my-trips/page";
 import { useTripDetail, useUserDetail } from "@/app/provider";
@@ -30,8 +31,14 @@ const ViewTrip = () => {
     setTripDetailInfo(result?.tripDetail)
 
   };
-  return <div>
-    <Itinerary />
+  return <div className="grid grid-cols-5">
+     <div className="col-span-3">
+      <Itinerary />
+      </div>
+
+      <div className="col-span-2">
+        <GlobalMap/>
+      </div>
   </div>;
 };
 
